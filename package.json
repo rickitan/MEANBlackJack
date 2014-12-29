@@ -1,0 +1,23 @@
+{
+  "name": "blackjack",
+  "version": "0.0.1",
+  "description": "A multiplayer blackjack game created with Node, Express, SocketIO",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "blackjack",
+    "node",
+    "express",
+    "multiplayer"
+  ],
+  "author": "Ricardo Macario, Diego Macario & Daniel Macario",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.10.6",
+    "socket.io": "^1.2.1",
+    "underscore": "^1.7.0"
+  }
+}
