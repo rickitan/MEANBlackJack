@@ -2,7 +2,10 @@ var _ = require('underscore');
 
 var deck = require('./deck');
 var players = [];
+var waitingPlayer = [];
 var currentPlayerIndex = 0;
+var isGameActive = false;
+
 var dealer = {
     hand: {
         count: 0,
@@ -11,7 +14,7 @@ var dealer = {
 }
 
 function shuffle(){
-    deck = _.shuffle(deck)
+    deck = _.shuffle(deck);
 }
 
 function dealCards(){
@@ -21,25 +24,26 @@ function dealCards(){
             players[playerIndex].hand.cards.push(card);
             players[playerIndex].hand.count += card.value;
         }
-        var card = deck.pop();
-        dealer.hand.cards.push(card);
-        dealer.hand.count += card.value;
+        giveDealerCard();
     }
 }
 
-function playersLoop(){
-
+function giveDealerCard(){
+    var card = deck.pop();
+    dealer.hand.cards.push(card);
+    dealer.hand.count += card.value;
 }
 
 
 function start(){
     shuffle();
     dealCards();
-    playersLoop();
+    players[currentPlayerIndex].turn = true;
+    emitGameState();
 }
 
 function getPlayers(){
-    return players;
+    return _.map(players, function(p){return _.omit(p, 'socket')});
 }
 
 function getDealer(){
@@ -47,14 +51,64 @@ function getDealer(){
 }
 
 function addPlayer(player){
+    if (isGameActive) { waitingPlayer.push(player) }
     players.push(player);
+    createListenActions(player);
+}
+
+function giveCardToPlayer(playerNumber){
+    var card = deck.pop();
+    players[playerNumber].hand.cards.push(card);
+}
+
+function createListenActions(player){
+    player.socket.on('hit', function(data){
+        //TODO validate that the player is hitting is the same as player index
+        giveCardToPlayer(currentPlayerIndex);
+        emitGameState();
+    })
+
+    player.socket.on('double', function(data){
+        players[currentPlayerIndex].stake = players[currentPlayerIndex].stake * 2;
+        giveCardToPlayer(currentPlayerIndex);
+        nextPlayer();
+    })
+
+    player.socket.on('stand', function(data){
+        nextPlayer();
+    })
+}
+
+function nextPlayer(){
+    players[currentPlayerIndex].turn = false;
+    currentPlayerIndex++;
+    if(players[currentPlayerIndex]){
+        players[currentPlayerIndex].turn = true;
+        emitGameState();
+    }else{
+        dealerTurn();
+    }
+}
+
+function dealerTurn(){
+    while(dealer.hand.count < 17){
+        giveDealerCard();
+    }
+    emitGameState();
+}
+
+function emitGameState(){
+    _.each(players, function(player){
+        player.socket.emit('gameState', {players: getPlayers(), dealer: getDealer()});
+    })
 }
 
 module.exports = {
     start: start,
     getPlayers: getPlayers,
     getDealer: getDealer,
-    addPlayer: addPlayer
+    addPlayer: addPlayer,
+    giveCardToPlayer: giveCardToPlayer
 };
 
 

@@ -1,18 +1,19 @@
 angular.module('app')
     .controller('gameController', function($scope){
+        $scope.playerName = prompt('Enter a username');
 
         var socket = io.connect('http://localhost:3000/');
         socket.on('connect', function(){
-            socket.emit('joinGame', {name: 'Ricardo Macario'})
+            socket.emit('joinGame', {name: $scope.playerName})
         })
 
         socket.on('gameState', function (gameState) {
             $scope.$apply(function(){
                 $scope.dealer = gameState.dealer;
                 $scope.players = gameState.players;
+                $scope.playersIndexedByName = _.indexBy(gameState.players, 'name')
             })
         });
-
 
         $scope.dealer = {
             hand: {
@@ -53,17 +54,21 @@ angular.module('app')
         ];
 
         $scope.hit = function(){
-
+            socket.emit('hit', {});
         }
 
         $scope.stand = function(){
-
+            socket.emit('stand', {});
         }
         $scope.double = function(){
-
+            socket.emit('double', {});
         }
         $scope.split = function(){
+            socket.emit('split', {});
+        }
 
+        $scope.startGame = function(){
+            socket.emit('startGame');
         }
 
 
