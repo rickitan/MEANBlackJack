@@ -8,9 +8,9 @@ module.exports = [
     {color: 'red', suit: 'diamond', value: 8, imageName: '8_of_diamonds'},
     {color: 'red', suit: 'diamond', value: 9, imageName: '9_of_diamonds'},
     {color: 'red', suit: 'diamond', value: 10, imageName: '10_of_diamonds'},
-    {color: 'red', suit: 'diamond', value: 10, imageName: 'jack_of_diamonds'},
-    {color: 'red', suit: 'diamond', value: 10, imageName: 'queen_of_diamonds'},
-    {color: 'red', suit: 'diamond', value: 10, imageName: 'king_of_diamonds'},
+    {color: 'red', suit: 'diamond', value: 10, imageName: 'jack_of_diamonds2'},
+    {color: 'red', suit: 'diamond', value: 10, imageName: 'queen_of_diamonds2'},
+    {color: 'red', suit: 'diamond', value: 10, imageName: 'king_of_diamonds2'},
     {color: 'red', suit: 'diamond', value: 11, imageName: 'ace_of_diamonds'},
 
     {color: 'red', suit: 'heart', value: 2, imageName: '2_of_hearts'},
@@ -22,9 +22,9 @@ module.exports = [
     {color: 'red', suit: 'heart', value: 8, imageName: '8_of_hearts'},
     {color: 'red', suit: 'heart', value: 9, imageName: '9_of_hearts'},
     {color: 'red', suit: 'heart', value: 10, imageName: '10_of_hearts'},
-    {color: 'red', suit: 'heart', value: 10, imageName: 'jack_of_hearts'},
-    {color: 'red', suit: 'heart', value: 10, imageName: 'queen_of_hearts'},
-    {color: 'red', suit: 'heart', value: 10, imageName: 'king_of_hearts'},
+    {color: 'red', suit: 'heart', value: 10, imageName: 'jack_of_hearts2'},
+    {color: 'red', suit: 'heart', value: 10, imageName: 'queen_of_hearts2'},
+    {color: 'red', suit: 'heart', value: 10, imageName: 'king_of_hearts2'},
     {color: 'red', suit: 'heart', value: 11, imageName: 'ace_of_hearts'},
 
     {color: 'black', suit: 'spade', value: 2, imageName: '2_of_spades'},
@@ -36,10 +36,10 @@ module.exports = [
     {color: 'black', suit: 'spade', value: 8, imageName: '8_of_spades'},
     {color: 'black', suit: 'spade', value: 9, imageName: '9_of_spades'},
     {color: 'black', suit: 'spade', value: 10, imageName: '10_of_spades'},
-    {color: 'black', suit: 'spade', value: 10, imageName: 'jack_of_spades'},
-    {color: 'black', suit: 'spade', value: 10, imageName: 'queen_of_spades'},
-    {color: 'black', suit: 'spade', value: 10, imageName: 'king_of_spades'},
-    {color: 'black', suit: 'spade', value: 11, imageName: 'ace_of_spades'},
+    {color: 'black', suit: 'spade', value: 10, imageName: 'jack_of_spades2'},
+    {color: 'black', suit: 'spade', value: 10, imageName: 'queen_of_spades2'},
+    {color: 'black', suit: 'spade', value: 10, imageName: 'king_of_spades2'},
+    {color: 'black', suit: 'spade', value: 11, imageName: 'ace_of_spades2'},
 
     {color: 'black', suit: 'club', value: 2, imageName: '2_of_clubs'},
     {color: 'black', suit: 'club', value: 3, imageName: '3_of_clubs'},
@@ -50,9 +50,8 @@ module.exports = [
     {color: 'black', suit: 'club', value: 8, imageName: '8_of_clubs'},
     {color: 'black', suit: 'club', value: 9, imageName: '9_of_clubs'},
     {color: 'black', suit: 'club', value: 10, imageName: '10_of_clubs'},
-    {color: 'black', suit: 'club', value: 10, imageName: 'jack_of_clubs'},
-    {color: 'black', suit: 'club', value: 10, imageName: 'queen_of_clubs'},
-    {color: 'black', suit: 'club', value: 10, imageName: 'king_of_clubs'},
+    {color: 'black', suit: 'club', value: 10, imageName: 'jack_of_clubs2'},
+    {color: 'black', suit: 'club', value: 10, imageName: 'queen_of_clubs2'},
+    {color: 'black', suit: 'club', value: 10, imageName: 'king_of_clubs2'},
     {color: 'black', suit: 'club', value: 11, imageName: 'ace_of_clubs'}
-
 ]

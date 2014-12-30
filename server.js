@@ -1,5 +1,7 @@
 var express = require('express')
-  , app = express();
+  , app = express()
+  , io =  require('socket.io')
+
 
 app.use(express.static(__dirname + '/public'));
 
@@ -16,3 +18,23 @@ var server = app.listen(3000, function () {
     console.log('Example app listening at http://%s:%s', host, port);
 
 });
+
+io = io(server);
+
+var game = require('./game');
+var player = require('./player');
+
+io.on('connection', function (socket) {
+
+    socket.on('joinGame', function(playerData){
+        var newPlayer = new player(playerData.name);
+        game.addPlayer(newPlayer);
+        game.start();
+        setTimeout(function(){emitGameState(socket)}, 10000)
+    });
+
+});
+
+function emitGameState(socket){
+    socket.emit('gameState', {players: game.getPlayers(), dealer: game.getDealer()});
+}
