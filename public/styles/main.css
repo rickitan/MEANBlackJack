@@ -1,0 +1,14 @@
+.card{
+    height: 150px;
+    width: 98%;
+}
+.dealerName{
+    text-align: center;
+}
+.playerArea{
+    border: 1px solid grey;
+}
+.actionBar{
+    text-align: center;
+    margin-bottom: 5px;
+}
