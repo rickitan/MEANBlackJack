@@ -15,6 +15,8 @@ module.exports = function Game(){
         }
     };
 
+    /*** Public Methods ***/
+
     this.addPlayer = function addPlayer(player){
         if (isGameActive) { waitingPlayer.push(player) }
         players.push(player);
@@ -22,6 +24,8 @@ module.exports = function Game(){
     };
 
     this.getPlayers = getPlayers;
+
+    /**********************/
 
     function start(){
         shuffle();
