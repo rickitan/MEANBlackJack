@@ -110,6 +110,21 @@ module.exports = function Game(){
         while(dealer.hand.count < 17){
             giveDealerCard();
         }
+        pickWinners();
+    }
+
+    function pickWinners(){
+        var dealerScore = dealer.hand.count;
+        _.each(players, function(player){
+            if(player.hand.count > dealerScore){
+                player.bank += (player.stake * 2);
+            }else if(player.hand.count === dealerScore){
+                player.bank += player.stake;
+            }else{
+                player.bank = player.bank - player.stake;
+            }
+            player.stake = 0;
+        });
         emitGameState();
     }
 
