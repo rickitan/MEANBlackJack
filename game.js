@@ -66,13 +66,18 @@ module.exports = function Game(){
     function giveCardToPlayer(playerNumber){
         var card = deck.pop();
         players[playerNumber].hand.cards.push(card);
+        players[playerNumber].hand.count += card.value;
     }
 
     function createListenActions(player){
         player.socket.on('hit', function(data){
             //TODO validate that the player is hitting is the same as player index
             giveCardToPlayer(currentPlayerIndex);
-            emitGameState();
+            if(player.hand.count >= 21){
+                nextPlayer();
+            }else{
+                emitGameState();
+            }
         });
 
         player.socket.on('double', function(data){
