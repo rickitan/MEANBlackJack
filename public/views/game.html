@@ -18,7 +18,7 @@
         <div class="row">
             <div class="col-xs-3" ng-repeat="card in player.hand.cards"><img class="card" ng-src="images/cards/{{card.imageName}}.svg"></div>
         </div>
-        <div class="row actionBar" ng-show="playersIndexedByName[playerName].turn">
+        <div class="row actionBar" ng-show="playersIndexedByName[playerName].turn && player.name === playerName">
             <div>
                 <button class="btn btn-success" ng-click="hit()">Hit</button>
                 <button class="btn btn-danger" ng-click="stand()">Stand</button>

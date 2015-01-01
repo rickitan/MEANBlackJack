@@ -1,114 +1,115 @@
 var _ = require('underscore');
+var originalDeck = require('./deck');
 
-var deck = require('./deck');
-var players = [];
-var waitingPlayer = [];
-var currentPlayerIndex = 0;
-var isGameActive = false;
+module.exports = function Game(){
+    var players = [];
+    var waitingPlayer = [];
+    var currentPlayerIndex = 0;
+    var isGameActive = false;
+    var deck = _.clone(originalDeck);
 
-var dealer = {
-    hand: {
-        count: 0,
-        cards: []
-    }
-}
-
-function shuffle(){
-    deck = _.shuffle(deck);
-}
-
-function dealCards(){
-    for (var i = 0; i < 2; i++){
-        for (var playerIndex = 0; playerIndex < players.length; playerIndex++){
-            var card = deck.pop();
-            players[playerIndex].hand.cards.push(card);
-            players[playerIndex].hand.count += card.value;
+    var dealer = {
+        hand: {
+            count: 0,
+            cards: []
         }
-        giveDealerCard();
-    }
-}
+    };
 
-function giveDealerCard(){
-    var card = deck.pop();
-    dealer.hand.cards.push(card);
-    dealer.hand.count += card.value;
-}
+    this.addPlayer = function addPlayer(player){
+        if (isGameActive) { waitingPlayer.push(player) }
+        players.push(player);
+        createListenActions(player);
+    };
 
+    this.getPlayers = getPlayers;
 
-function start(){
-    shuffle();
-    dealCards();
-    players[currentPlayerIndex].turn = true;
-    emitGameState();
-}
-
-function getPlayers(){
-    return _.map(players, function(p){return _.omit(p, 'socket')});
-}
-
-function getDealer(){
-    return dealer;
-}
-
-function addPlayer(player){
-    if (isGameActive) { waitingPlayer.push(player) }
-    players.push(player);
-    createListenActions(player);
-}
-
-function giveCardToPlayer(playerNumber){
-    var card = deck.pop();
-    players[playerNumber].hand.cards.push(card);
-}
-
-function createListenActions(player){
-    player.socket.on('hit', function(data){
-        //TODO validate that the player is hitting is the same as player index
-        giveCardToPlayer(currentPlayerIndex);
-        emitGameState();
-    })
-
-    player.socket.on('double', function(data){
-        players[currentPlayerIndex].stake = players[currentPlayerIndex].stake * 2;
-        giveCardToPlayer(currentPlayerIndex);
-        nextPlayer();
-    })
-
-    player.socket.on('stand', function(data){
-        nextPlayer();
-    })
-}
-
-function nextPlayer(){
-    players[currentPlayerIndex].turn = false;
-    currentPlayerIndex++;
-    if(players[currentPlayerIndex]){
+    function start(){
+        shuffle();
+        dealCards();
         players[currentPlayerIndex].turn = true;
         emitGameState();
-    }else{
-        dealerTurn();
     }
-}
 
-function dealerTurn(){
-    while(dealer.hand.count < 17){
-        giveDealerCard();
+    function shuffle(){
+        deck = _.shuffle(deck);
     }
-    emitGameState();
-}
 
-function emitGameState(){
-    _.each(players, function(player){
-        player.socket.emit('gameState', {players: getPlayers(), dealer: getDealer()});
-    })
-}
+    function dealCards(){
+        for (var i = 0; i < 2; i++){
+            for (var playerIndex = 0; playerIndex < players.length; playerIndex++){
+                var card = deck.pop();
+                players[playerIndex].hand.cards.push(card);
+                players[playerIndex].hand.count += card.value;
+            }
+            giveDealerCard();
+        }
+    }
 
-module.exports = {
-    start: start,
-    getPlayers: getPlayers,
-    getDealer: getDealer,
-    addPlayer: addPlayer,
-    giveCardToPlayer: giveCardToPlayer
+    function giveDealerCard(){
+        var card = deck.pop();
+        dealer.hand.cards.push(card);
+        dealer.hand.count += card.value;
+    }
+
+    function getPlayers(){
+        return _.map(players, function(p){return _.omit(p, 'socket')});
+    }
+
+    function getDealer(){
+        return dealer;
+    }
+
+    function giveCardToPlayer(playerNumber){
+        var card = deck.pop();
+        players[playerNumber].hand.cards.push(card);
+    }
+
+    function createListenActions(player){
+        player.socket.on('hit', function(data){
+            //TODO validate that the player is hitting is the same as player index
+            giveCardToPlayer(currentPlayerIndex);
+            emitGameState();
+        });
+
+        player.socket.on('double', function(data){
+            players[currentPlayerIndex].stake = players[currentPlayerIndex].stake * 2;
+            giveCardToPlayer(currentPlayerIndex);
+            nextPlayer();
+        });
+
+        player.socket.on('stand', function(data){
+            nextPlayer();
+        });
+
+        player.socket.on('startGame', function(){
+            start();
+        })
+    }
+
+    function nextPlayer(){
+        players[currentPlayerIndex].turn = false;
+        currentPlayerIndex++;
+        if(players[currentPlayerIndex]){
+            players[currentPlayerIndex].turn = true;
+            emitGameState();
+        }else{
+            dealerTurn();
+        }
+    }
+
+    function dealerTurn(){
+        while(dealer.hand.count < 17){
+            giveDealerCard();
+        }
+        emitGameState();
+    }
+
+    function emitGameState(){
+        _.each(players, function(player){
+            player.socket.emit('gameState', {players: getPlayers(), dealer: getDealer()});
+        })
+    }
+
 };
 
 

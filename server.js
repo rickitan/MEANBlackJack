@@ -21,24 +21,22 @@ var server = app.listen(3000, function () {
 
 io = io(server);
 
-var game = require('./game');
+var Game = require('./game');
 var Player = require('./player');
+var games = [new Game(), new Game(), new Game()];
 
 io.on('connection', function (socket) {
 
     socket.on('joinGame', function(playerData){
-        console.log('Player joined game:' + playerData.name);
-
-
         var newPlayer = new Player(playerData.name, socket);
-        game.addPlayer(newPlayer);
-        //socket.emit('playerNumber', {playerNumber: game.getPlayers().length - 1});
-        //setTimeout(function(){emitGameState(socket)}, 10000)
+        console.log('Player joined game:' + playerData.name);
+        for (var i = 0; i < games.length; i++){
+            if(games[i].getPlayers().length < 3){
+                games[i].addPlayer(newPlayer);
+                break;
+            }
+        }
     });
-
-    socket.on('startGame', function(){
-        game.start();
-    })
 
 });
 
