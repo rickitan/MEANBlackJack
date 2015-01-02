@@ -6,4 +6,5 @@ module.exports = function player(name, socket){
     this.showControls = false;
     this.socket = socket;
     this.turn = false;
+    this.gameOutCome;
 };

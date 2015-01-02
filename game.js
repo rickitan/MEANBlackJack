@@ -33,7 +33,7 @@ module.exports = function Game(){
         shuffle();
         dealCards();
         players[0].turn = true;
-        emitGameState();
+        emitGameState("stakeRound");
     }
 
     function newHand(){
@@ -48,7 +48,7 @@ module.exports = function Game(){
         players[0].turn = true;
         currentPlayerIndex = 0;
         dealCards();
-        emitGameState();
+        emitGameState("inGame");
     }
 
     function removeOfflinePlayers(){
@@ -102,7 +102,7 @@ module.exports = function Game(){
             if(player.hand.count >= 21){
                 nextPlayer();
             }else{
-                emitGameState();
+                emitGameState("inGame");
             }
         });
 
@@ -136,7 +136,7 @@ module.exports = function Game(){
         currentPlayerIndex++;
         if(players[currentPlayerIndex]){
             players[currentPlayerIndex].turn = true;
-            emitGameState();
+            emitGameState("inGame");
             playerTurnTimeoutId = setTimeout(nextPlayer, 10000);
         }else{
             dealerTurn();
@@ -152,23 +152,41 @@ module.exports = function Game(){
 
     function pickWinners(){
         var dealerScore = dealer.hand.count;
+        var playerScore;
+        console.log('pickingwinners');
+        console.log('dealer score = ' + dealerScore);
         _.each(players, function(player){
-            if(player.hand.count > dealerScore){
-                player.bank += (player.stake * 2);
-            }else if(player.hand.count === dealerScore){
-                player.bank += player.stake;
-            }else{
-                player.bank = player.bank - player.stake;
+            playerScore = player.hand.count;
+            console.log('player score = ' + player.hand.count);
+            
+            if (playerScore <= 21) {
+                if (playerScore > dealerScore) {
+                    if (playerScore === 21 && player.hand.cards.length === 2) {
+                        player.bank += (player.stake * 3/2);
+                        player.gameOutCome = "Blackjack!";
+                    } else {
+                        player.bank += (player.stake * 2);
+                        player.gameOutCome = "You Win!";
+                    }
+                } else if (player.hand.count === dealerScore) {
+                    player.bank += player.stake;
+                    player.gameOutCome = "Push";
+                } else {
+                    player.gameOutCome = "You lose!";
+                }
+            } else {
+                player.gameOutCome = "You lose!";
             }
             player.stake = 0;
         });
-        emitGameState();
+
+        emitGameState("gameOver");
         setTimeout(newHand, 5000);
     }
 
-    function emitGameState(){
+    function emitGameState(gamePhase){
         _.each(players, function(player){
-            player.socket.emit('gameState', {players: getPlayers(), dealer: getDealer()});
+            player.socket.emit('gameState', {players: getPlayers(), dealer: getDealer(), gamePhase: gamePhase});
         })
     }
 
@@ -177,7 +195,7 @@ module.exports = function Game(){
         var stakeValue = stakeData.stakeValue;
         currentPlayer.stake += stakeValue;
         currentPlayer.bank -= stakeValue;
-        emitGameState();
+        emitGameState("stakeRound");
     }
 
 };
