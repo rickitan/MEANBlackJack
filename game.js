@@ -125,6 +125,10 @@ module.exports = function Game(){
         player.socket.on('disconnect', function(){
             offlinePlayers.push(player);
         })
+
+        player.socket.on('incrementStake', function(stake){
+            incrementStake(stake);
+        });
     }
 
     function nextPlayer(){
@@ -166,6 +170,14 @@ module.exports = function Game(){
         _.each(players, function(player){
             player.socket.emit('gameState', {players: getPlayers(), dealer: getDealer()});
         })
+    }
+
+    function incrementStake(stakeData) {
+        var currentPlayer = players[currentPlayerIndex];
+        var stakeValue = stakeData.stakeValue;
+        currentPlayer.stake += stakeValue;
+        currentPlayer.bank -= stakeValue;
+        emitGameState();
     }
 
 };

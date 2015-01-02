@@ -71,5 +71,14 @@ angular.module('app')
             socket.emit('startGame');
         }
 
+        $scope.incrementStake = function(stake){
+            var moneyAvailable = $scope.playersIndexedByName[$scope.playerName].bank;
+            if (stake > moneyAvailable) {
+                alert('You do not have enough money in the bank!');
+                return;
+            } 
+            socket.emit('incrementStake', {stakeValue: stake});
+        }
+
 
     })
