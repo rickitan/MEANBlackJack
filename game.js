@@ -4,9 +4,11 @@ var originalDeck = require('./deck');
 module.exports = function Game(){
     var players = [];
     var waitingPlayer = [];
+    var offlinePlayers = [];
     var currentPlayerIndex = 0;
     var isGameActive = false;
     var deck = _.clone(originalDeck);
+    var playerTurnTimeoutId;
 
     var dealer = {
         hand: {
@@ -35,6 +37,7 @@ module.exports = function Game(){
     }
 
     function newHand(){
+        removeOfflinePlayers();
         _.each(players, function(player){
             player.hand.cards = [];
             player.hand.count = 0;
@@ -46,6 +49,14 @@ module.exports = function Game(){
         currentPlayerIndex = 0;
         dealCards();
         emitGameState();
+    }
+
+    function removeOfflinePlayers(){
+        _.each(offlinePlayers, function(offlinePlayer){
+            var indexOfflinePlayer = players.indexOf(offlinePlayer);
+            players.splice(indexOfflinePlayer, 1);
+        });
+        offlinePlayers = [];
     }
 
     function shuffle(){
@@ -86,6 +97,7 @@ module.exports = function Game(){
     function createListenActions(player){
         player.socket.on('hit', function(data){
             //TODO validate that the player is hitting is the same as player index
+            clearTimeout(playerTurnTimeoutId);
             giveCardToPlayer(currentPlayerIndex);
             if(player.hand.count >= 21){
                 nextPlayer();
@@ -95,17 +107,23 @@ module.exports = function Game(){
         });
 
         player.socket.on('double', function(data){
+            clearTimeout(playerTurnTimeoutId);
             players[currentPlayerIndex].stake = players[currentPlayerIndex].stake * 2;
             giveCardToPlayer(currentPlayerIndex);
             nextPlayer();
         });
 
         player.socket.on('stand', function(data){
+            clearTimeout(playerTurnTimeoutId);
             nextPlayer();
         });
 
         player.socket.on('startGame', function(){
             start();
+        })
+
+        player.socket.on('disconnect', function(){
+            offlinePlayers.push(player);
         })
     }
 
@@ -115,6 +133,7 @@ module.exports = function Game(){
         if(players[currentPlayerIndex]){
             players[currentPlayerIndex].turn = true;
             emitGameState();
+            playerTurnTimeoutId = setTimeout(nextPlayer, 10000);
         }else{
             dealerTurn();
         }
