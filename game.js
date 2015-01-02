@@ -30,7 +30,21 @@ module.exports = function Game(){
     function start(){
         shuffle();
         dealCards();
-        players[currentPlayerIndex].turn = true;
+        players[0].turn = true;
+        emitGameState();
+    }
+
+    function newHand(){
+        _.each(players, function(player){
+            player.hand.cards = [];
+            player.hand.count = 0;
+            player.turn = false;
+        });
+        dealer.hand.cards = [];
+        dealer.hand.count = 0;
+        players[0].turn = true;
+        currentPlayerIndex = 0;
+        dealCards();
         emitGameState();
     }
 
@@ -126,6 +140,7 @@ module.exports = function Game(){
             player.stake = 0;
         });
         emitGameState();
+        setTimeout(newHand, 5000);
     }
 
     function emitGameState(){
