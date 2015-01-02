@@ -1,12 +1,25 @@
 <div>
     <button ng-click="startGame()">Start Game </button>
+    <p>Game Phase: {{gamePhase}}</p>
 </div>
 
 <div>
-    <button class="btn btn-success" ng-click="incrementStake(10)">10</button>
-    <button class="btn btn-success" ng-click="incrementStake(100)">100</button>
-    <button class="btn btn-success" ng-click="incrementStake(500)">500</button>
-    <button class="btn btn-succces" ng-click="incrementStake(1000)">1000</button>
+    <div class="row">
+
+        <h2 class="col-md-offset-1">Make your stake!</h2>
+        <div class="col-md-3 col-md-offset-1">
+            <button class="btn btn-success" ng-click="incrementStake(10)">10</button>
+            <button class="btn btn-success" ng-click="incrementStake(100)">100</button>
+            <button class="btn btn-success" ng-click="incrementStake(500)">500</button>
+            <button class="btn btn-succces" ng-click="incrementStake(1000)">1000</button>
+        </div>
+        <div class="col-md-4">
+            Staking: {{playersIndexedByName[playerName].stake}} Bank: {{playersIndexedByName[playerName].bank}}
+        </div>
+
+    </div>
+
+
 </div>
 
 <div class="row">
@@ -21,8 +34,6 @@
 <div class="row">
     <div class="col-md-3 col-md-offset-1 playerArea" ng-repeat="player in players">
         <h1 class="dealerName">{{player.name}}</h1>
-        <h4>Bank: {{player.bank}}</h4>
-        <h4>Stake: {{player.stake}}</h4>
         <h4>Score: {{player.hand.count}}</h4>
         <h3 ng-show="gamePhase === 'gameOver'"> {{player.gameOutCome}} </h3>
         <div class="row">

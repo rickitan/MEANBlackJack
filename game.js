@@ -5,7 +5,7 @@ module.exports = function Game(){
     var players = [];
     var waitingPlayer = [];
     var offlinePlayers = [];
-    var currentPlayerIndex = 0;
+    var currentPlayerIndex;
     var isGameActive = false;
     var deck = _.clone(originalDeck);
     var playerTurnTimeoutId;
@@ -31,9 +31,7 @@ module.exports = function Game(){
 
     function start(){
         shuffle();
-        dealCards();
-        players[0].turn = true;
-        emitGameState("stakeRound");
+        newHand();
     }
 
     function newHand(){
@@ -45,10 +43,14 @@ module.exports = function Game(){
         });
         dealer.hand.cards = [];
         dealer.hand.count = 0;
-        players[0].turn = true;
-        currentPlayerIndex = 0;
-        dealCards();
-        emitGameState("inGame");
+        currentPlayerIndex = undefined;
+        emitGameState('stakeRound');
+
+        setTimeout(function(){
+            dealCards();
+            nextPlayer();
+        }, 10000);
+
     }
 
     function removeOfflinePlayers(){
@@ -127,13 +129,26 @@ module.exports = function Game(){
         })
 
         player.socket.on('incrementStake', function(stake){
-            incrementStake(stake);
+            var stakeValue = stake.stakeValue;
+            player.stake += stakeValue;
+            player.bank -= stakeValue;
+
+            console.log('player', player.stake, player.bank);
+
+            emitGameState("stakeRound");
         });
     }
 
     function nextPlayer(){
-        players[currentPlayerIndex].turn = false;
-        currentPlayerIndex++;
+        if(currentPlayerIndex === undefined){
+            currentPlayerIndex = 0;
+        }else{
+            players[currentPlayerIndex].turn = false;
+            currentPlayerIndex++;
+        }
+
+        console.log('currentPlayerIndex --> ', currentPlayerIndex);
+
         if(players[currentPlayerIndex]){
             players[currentPlayerIndex].turn = true;
             emitGameState("inGame");
@@ -188,14 +203,6 @@ module.exports = function Game(){
         _.each(players, function(player){
             player.socket.emit('gameState', {players: getPlayers(), dealer: getDealer(), gamePhase: gamePhase});
         })
-    }
-
-    function incrementStake(stakeData) {
-        var currentPlayer = players[currentPlayerIndex];
-        var stakeValue = stakeData.stakeValue;
-        currentPlayer.stake += stakeValue;
-        currentPlayer.bank -= stakeValue;
-        emitGameState("stakeRound");
     }
 
 };
