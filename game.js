@@ -99,9 +99,15 @@ module.exports = function Game(){
             //TODO validate that the player is hitting is the same as player index
             clearTimeout(playerTurnTimeoutId);
             giveCardToPlayer(currentPlayerIndex);
-            if(player.hand.count >= 21){
-                nextPlayer();
-            }else{
+            if (player.hand.count > 21) {
+                if (handContainsAce(player.hand.cards)){
+                    players[currentPlayerIndex].hand.count -= 11;
+                    players[currentPlayerIndex].hand.count += 1;
+                    emitGameState("inGame");
+                } else {
+                    nextPlayer();
+                }
+            } else {
                 emitGameState("inGame");
             }
         });
@@ -129,6 +135,20 @@ module.exports = function Game(){
         player.socket.on('incrementStake', function(stake){
             incrementStake(stake);
         });
+    }
+
+    function handContainsAce(cards) {
+        var containsAce = false;
+
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+            if (card.value === 11 && (card.valueReduced === undefined)) {
+                card.valueReduced = true;
+                containsAce = true;
+                break;
+            }
+        }
+        return containsAce;
     }
 
     function nextPlayer(){
