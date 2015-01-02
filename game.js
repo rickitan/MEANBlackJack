@@ -160,7 +160,7 @@ module.exports = function Game(){
             console.log('player score = ' + player.hand.count);
             
             if (playerScore <= 21) {
-                if (playerScore > dealerScore) {
+                if (playerScore > dealerScore || dealerScore > 21) {
                     if (playerScore === 21 && player.hand.cards.length === 2) {
                         player.bank += (player.stake * 3/2);
                         player.gameOutCome = "Blackjack!";
