@@ -9,6 +9,7 @@ module.exports = function Game(){
     var isGameActive = false;
     var deck = _.clone(originalDeck);
     var playerTurnTimeoutId;
+    var discardedCards = [];
 
     var dealer = {
         hand: {
@@ -35,12 +36,25 @@ module.exports = function Game(){
     }
 
     function newHand(){
+        discardPreviousHand();
         removeOfflinePlayers();
+        players[0].turn = true;
+        currentPlayerIndex = 0;
+        dealCards();
+        emitGameState("inGame");
+    }
+
+    function discardPreviousHand() {
         _.each(players, function(player){
+            restoreAcesToDefaultState(player.hand.cards);
+            discardedCards = discardedCards.concat(player.hand.cards);
             player.hand.cards = [];
             player.hand.count = 0;
             player.turn = false;
         });
+
+        restoreAcesToDefaultState(dealer.hand.cards);
+        discardedCards = discardedCards.concat(dealer.hand.cards);
         dealer.hand.cards = [];
         dealer.hand.count = 0;
         currentPlayerIndex = undefined;
@@ -51,6 +65,12 @@ module.exports = function Game(){
             nextPlayer();
         }, 10000);
 
+    }
+
+    function restoreAcesToDefaultState(cards) {
+        _.each(cards, function(card) {
+            delete card.valueReduced;
+        });
     }
 
     function removeOfflinePlayers(){
@@ -68,6 +88,7 @@ module.exports = function Game(){
     function dealCards(){
         for (var i = 0; i < 2; i++){
             for (var playerIndex = 0; playerIndex < players.length; playerIndex++){
+                if (deck.length === 0) handleEmptyDeck();
                 var card = deck.pop();
                 players[playerIndex].hand.cards.push(card);
                 players[playerIndex].hand.count += card.value;
@@ -76,7 +97,13 @@ module.exports = function Game(){
         }
     }
 
+    function handleEmptyDeck() {
+        deck = _.chain(discardedCards).shuffle().clone().value();
+        discardedCards = [];
+    }
+
     function giveDealerCard(){
+        if (deck.length === 0) handleEmptyDeck();
         var card = deck.pop();
         dealer.hand.cards.push(card);
         dealer.hand.count += card.value;
@@ -91,6 +118,7 @@ module.exports = function Game(){
     }
 
     function giveCardToPlayer(playerNumber){
+        if (deck.length === 0) handleEmptyDeck();
         var card = deck.pop();
         players[playerNumber].hand.cards.push(card);
         players[playerNumber].hand.count += card.value;
@@ -101,9 +129,15 @@ module.exports = function Game(){
             //TODO validate that the player is hitting is the same as player index
             clearTimeout(playerTurnTimeoutId);
             giveCardToPlayer(currentPlayerIndex);
-            if(player.hand.count >= 21){
-                nextPlayer();
-            }else{
+            if (player.hand.count > 21) {
+                if (handContainsAce(player.hand.cards)){
+                    players[currentPlayerIndex].hand.count -= 11;
+                    players[currentPlayerIndex].hand.count += 1;
+                    emitGameState("inGame");
+                } else {
+                    nextPlayer();
+                }
+            } else {
                 emitGameState("inGame");
             }
         });
@@ -137,6 +171,20 @@ module.exports = function Game(){
 
             emitGameState("stakeRound");
         });
+    }
+
+    function handContainsAce(cards) {
+        var containsAce = false;
+
+        for (var i = 0; i < cards.length; i++) {
+            var card = cards[i];
+            if (card.value === 11 && (card.valueReduced === undefined)) {
+                card.valueReduced = true;
+                containsAce = true;
+                break;
+            }
+        }
+        return containsAce;
     }
 
     function nextPlayer(){
