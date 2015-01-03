@@ -1,5 +1,7 @@
 var app = angular.module('app');
-app.controller('gameController', function($scope){
+app.controller('gameController', function($scope, $interval){
+    var previousPhase;
+    var currentTimerPromise;
     $scope.playerName = prompt('Enter a username');
 
     var socket = io.connect('http://localhost:3000/');
@@ -13,6 +15,7 @@ app.controller('gameController', function($scope){
             $scope.dealer = gameState.dealer;
             $scope.players = gameState.players;
             $scope.playersIndexedByName = _.indexBy(gameState.players, 'name')
+            turnTimerOn(gameState.gamePhase);
         })
     });
 
@@ -79,6 +82,30 @@ app.controller('gameController', function($scope){
             return;
         } 
         socket.emit('incrementStake', {stakeValue: stake});
+    }
+
+    var playerPlayed = false;
+    function turnTimerOn(gamePhase){
+        if(gamePhase === 'stakeRound' && gamePhase !== previousPhase){
+            $scope.timer = 10;
+            playerPlayed = false;
+            currentTimerPromise = $interval(function(){
+                if($scope.timer > 0){
+                    $scope.timer--;
+                }
+            }, 1000, 10)
+        }else if(gamePhase === 'inGame' && $scope.playersIndexedByName[$scope.playerName].turn === true && !playerPlayed){
+            $scope.timer = 10;
+            playerPlayed = true;
+            currentTimerPromise = $interval(function(){
+                if($scope.timer > 0){
+                    $scope.timer--;
+                }
+            }, 1000, 10)
+        }else if(gamePhase === 'inGame' && $scope.playersIndexedByName[$scope.playerName].turn === false){
+            $interval.cancel(currentTimerPromise);
+        }
+        previousPhase = gamePhase;
     }
 
 
