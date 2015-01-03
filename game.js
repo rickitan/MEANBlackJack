@@ -9,6 +9,7 @@ module.exports = function Game(){
     var isGameActive = false;
     var deck = _.clone(originalDeck);
     var playerTurnTimeoutId;
+    var discardedCards = [];
 
     var dealer = {
         hand: {
@@ -37,18 +38,33 @@ module.exports = function Game(){
     }
 
     function newHand(){
+        discardPreviousHand();
         removeOfflinePlayers();
-        _.each(players, function(player){
-            player.hand.cards = [];
-            player.hand.count = 0;
-            player.turn = false;
-        });
-        dealer.hand.cards = [];
-        dealer.hand.count = 0;
         players[0].turn = true;
         currentPlayerIndex = 0;
         dealCards();
         emitGameState("inGame");
+    }
+
+    function discardPreviousHand() {
+        _.each(players, function(player){
+            restoreAcesToDefaultState(player.hand.cards);
+            discardedCards = discardedCards.concat(player.hand.cards);
+            player.hand.cards = [];
+            player.hand.count = 0;
+            player.turn = false;
+        });
+
+        restoreAcesToDefaultState(dealer.hand.cards);
+        discardedCards = discardedCards.concat(dealer.hand.cards);
+        dealer.hand.cards = [];
+        dealer.hand.count = 0;
+    }
+
+    function restoreAcesToDefaultState(cards) {
+        _.each(cards, function(card) {
+            delete card.valueReduced;
+        });
     }
 
     function removeOfflinePlayers(){
@@ -66,6 +82,7 @@ module.exports = function Game(){
     function dealCards(){
         for (var i = 0; i < 2; i++){
             for (var playerIndex = 0; playerIndex < players.length; playerIndex++){
+                if (deck.length === 0) handleEmptyDeck();
                 var card = deck.pop();
                 players[playerIndex].hand.cards.push(card);
                 players[playerIndex].hand.count += card.value;
@@ -74,7 +91,13 @@ module.exports = function Game(){
         }
     }
 
+    function handleEmptyDeck() {
+        deck = _.chain(discardedCards).shuffle().clone().value();
+        discardedCards = [];
+    }
+
     function giveDealerCard(){
+        if (deck.length === 0) handleEmptyDeck();
         var card = deck.pop();
         dealer.hand.cards.push(card);
         dealer.hand.count += card.value;
@@ -89,6 +112,7 @@ module.exports = function Game(){
     }
 
     function giveCardToPlayer(playerNumber){
+        if (deck.length === 0) handleEmptyDeck();
         var card = deck.pop();
         players[playerNumber].hand.cards.push(card);
         players[playerNumber].hand.count += card.value;
