@@ -39,9 +39,12 @@ module.exports = function Game(){
         discardPreviousHand();
         removeOfflinePlayers();
         players[0].turn = true;
-        currentPlayerIndex = 0;
-        dealCards();
-        emitGameState("inGame");
+        currentPlayerIndex = undefined;
+        emitGameState('stakeRound');
+        setTimeout(function(){
+            dealCards();
+            nextPlayer();
+        }, 10000);
     }
 
     function discardPreviousHand() {
@@ -57,14 +60,6 @@ module.exports = function Game(){
         discardedCards = discardedCards.concat(dealer.hand.cards);
         dealer.hand.cards = [];
         dealer.hand.count = 0;
-        currentPlayerIndex = undefined;
-        emitGameState('stakeRound');
-
-        setTimeout(function(){
-            dealCards();
-            nextPlayer();
-        }, 10000);
-
     }
 
     function restoreAcesToDefaultState(cards) {
