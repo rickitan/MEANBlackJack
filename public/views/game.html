@@ -15,7 +15,7 @@
             <button class="btn btn-succces" ng-click="incrementStake(1000)">1000</button>
         </div>
         <div class="col-md-4">
-            Staking: {{playersIndexedByName[playerName].stake}} Bank: {{playersIndexedByName[playerName].bank}}
+            Initial Stake: {{playersIndexedByName[playerName].hands[0].stake}} Bank: {{playersIndexedByName[playerName].bank}}
         </div>
         <div class="col-md-3 col-md-offset-9 error" ng-show="timer.active">
             {{timer.time}} seconds
@@ -43,6 +43,7 @@
 
             <div ng-repeat="hand in player.hands">
                 <h4>Score: {{hand.count}}</h4>
+                <h4>Stake: {{hand.stake}}</h4>
                 <h3 ng-show="gamePhase === 'gameOver'"> {{hand.gameOutCome}} </h3>
                 <div class="row">
                     <div class="col-xs-3" ng-repeat="card in hand.cards"><img class="card" ng-src="images/cards/{{card.imageName}}.svg"></div>

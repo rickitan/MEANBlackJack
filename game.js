@@ -38,7 +38,7 @@ module.exports = function Game(){
     }
 
     function getNewHandModel(){
-        return {count: 0, cards: [], gameOutCome: ''};
+        return {count: 0, cards: [], gameOutCome: '', stake: 0};
     }
 
     function newHand(){
@@ -157,9 +157,11 @@ module.exports = function Game(){
             }
         });
 
-        player.socket.on('double', function(data){
+        player.socket.on('double', function(){
+            if (player.hands[player.currentHandIndex].stake > player.bank) return;
             clearTimeout(playerTurnTimeoutId);
-            players[currentPlayerIndex].stake = players[currentPlayerIndex].stake * 2;
+            player.bank -= players[currentPlayerIndex].hands[player.currentHandIndex].stake;
+            players[currentPlayerIndex].hands[player.currentHandIndex].stake *= 2;
             giveCardToPlayer(currentPlayerIndex);
             if (hasNextHand(player)) {
                 transitionToNextHand(player);
@@ -170,17 +172,24 @@ module.exports = function Game(){
 
         player.socket.on('split', function() {
             var currentHandIndex = player.currentHandIndex;
-            if (player.hands[currentHandIndex].cards.length > 2 ||
+            if (player.hands[currentHandIndex].stake > player.bank || 
+                player.hands[currentHandIndex].cards.length > 2 ||
                 player.hands[currentHandIndex].cards[0].value !== player.hands[currentHandIndex].cards[1].value ||
                 player.hands[currentHandIndex].cards[0].suit !== player.hands[currentHandIndex].cards[1].suit ) return;
 
+            var stakeValue = player.hands[0].stake;
             var splitHand = getNewHandModel();
             var splitCard = player.hands[currentHandIndex].cards.pop();
             player.hands[currentHandIndex].count -= splitCard.value;
             splitHand.cards.push(splitCard);
             splitHand.count += splitCard.value;
+
+            splitHand.stake += stakeValue;
+            player.bank -= stakeValue;
+
             player.hands.push(splitHand);
             giveCardToPlayer(currentPlayerIndex);
+
             emitGameState('inGame');
         });
 
@@ -203,10 +212,10 @@ module.exports = function Game(){
 
         player.socket.on('incrementStake', function(stake){
             var stakeValue = stake.stakeValue;
-            player.stake += stakeValue;
+            player.hands[0].stake += stakeValue;
             player.bank -= stakeValue;
 
-            console.log('player', player.stake, player.bank);
+            console.log('player', player.hands[0].stake, player.bank);
 
             emitGameState("stakeRound");
         });
@@ -268,7 +277,6 @@ module.exports = function Game(){
             _.each(player.hands, function(hand){
                decideHandOutCome(hand, player);
             });
-            player.stake = 0;
         });
 
         emitGameState("gameOver");
@@ -283,14 +291,14 @@ module.exports = function Game(){
         if (playerScore <= 21) {
             if (playerScore > dealerScore || dealerScore > 21) {
                 if (playerScore === 21 && hand.cards.length === 2) {
-                    player.bank += (player.stake * 3/2);
+                    player.bank += (hand.stake * 3/2.1);
                     hand.gameOutCome = "Blackjack!";
                 } else {
-                    player.bank += (player.stake * 2);
+                    player.bank += (hand.stake * 2);
                     hand.gameOutCome = "You Win!";
                 }
             } else if (hand.count === dealerScore) {
-                player.bank += player.stake;
+                player.bank += hand.stake;
                 hand.gameOutCome = "Push";
             } else {
                 hand.gameOutCome = "You lose!";
