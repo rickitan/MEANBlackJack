@@ -7,7 +7,7 @@ app.controller('gameController', function($scope, $interval){
     var socket = io.connect('http://localhost:3000/');
     socket.on('connect', function(){
         socket.emit('joinGame', {name: $scope.playerName})
-    })
+    });
 
     socket.on('gameState', function (gameState) {
         $scope.$apply(function(){
@@ -93,14 +93,10 @@ app.controller('gameController', function($scope, $interval){
         }else if(gamePhase === 'inGame' && $scope.playersIndexedByName[$scope.playerName].turn === true && !playerPlayed){
             playerPlayed = true;
             startTimer();
-        }else{
-            $interval.cancel($scope.timer.promise);
+        }else if($scope.playersIndexedByName[$scope.playerName].turn === false && gamePhase !== 'stakeRound' ){
             $scope.timer.active = false;
+            $interval.cancel($scope.timer.promise);
         }
-
-        /*else if(gamePhase === 'inGame' && $scope.playersIndexedByName[$scope.playerName].turn === false){
-            $interval.cancel(currentTimerPromise);
-        }*/
         previousPhase = gamePhase;
     }
 
