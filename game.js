@@ -59,6 +59,7 @@ module.exports = function Game(){
             discardCards(player.hands);
             player.hands = [getNewHandModel()];
             player.turn = false;
+            player.currentHandIndex = 0;
         });
         restoreAcesToDefaultState(dealer.hands);
         discardCards(dealer.hands);
@@ -147,8 +148,7 @@ module.exports = function Game(){
                     currentHand.count += 1;
                     emitGameState("inGame");
                 } else if (hasNextHand(player)) {
-                    player.currentHandIndex++;
-                    emitGameState('inGame');
+                    transitionToNextHand();
                 } else {
                     nextPlayer();
                 }
@@ -162,8 +162,7 @@ module.exports = function Game(){
             players[currentPlayerIndex].stake = players[currentPlayerIndex].stake * 2;
             giveCardToPlayer(currentPlayerIndex);
             if (hasNextHand(player)) {
-                player.currentHandIndex++;
-                emitGameState('inGame');
+                transitionToNextHand(player);
             } else {
                 nextPlayer();
             }
@@ -179,16 +178,16 @@ module.exports = function Game(){
             var splitCard = player.hands[currentHandIndex].cards.pop();
             player.hands[currentHandIndex].count -= splitCard.value;
             splitHand.cards.push(splitCard);
-            splitHand.value += splitCard.value;
+            splitHand.count += splitCard.value;
             player.hands.push(splitHand);
+            giveCardToPlayer(currentPlayerIndex);
             emitGameState('inGame');
         });
 
         player.socket.on('stand', function(){
             clearTimeout(playerTurnTimeoutId);
             if (hasNextHand(player)) {
-                player.currentHandIndex++;
-                emitGameState('inGame');
+                transitionToNextHand(player);
             } else {
                 nextPlayer();
             }
@@ -211,6 +210,12 @@ module.exports = function Game(){
 
             emitGameState("stakeRound");
         });
+    }
+
+    function transitionToNextHand(currentPlayer) {
+        currentPlayer.currentHandIndex++;
+        giveCardToPlayer(currentPlayerIndex);
+        emitGameState('inGame');
     }
 
     function hasNextHand(player){
