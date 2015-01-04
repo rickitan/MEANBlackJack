@@ -85,28 +85,36 @@ app.controller('gameController', function($scope, $interval){
     }
 
     var playerPlayed = false;
+    $scope.timer = {time: 0, active: false, promise: null};
     function turnTimerOn(gamePhase){
         if(gamePhase === 'stakeRound' && gamePhase !== previousPhase){
-            $scope.timer = 10;
             playerPlayed = false;
-            currentTimerPromise = $interval(function(){
-                if($scope.timer > 0){
-                    $scope.timer--;
-                }
-            }, 1000, 10)
+            startTimer();
         }else if(gamePhase === 'inGame' && $scope.playersIndexedByName[$scope.playerName].turn === true && !playerPlayed){
-            $scope.timer = 10;
             playerPlayed = true;
-            currentTimerPromise = $interval(function(){
-                if($scope.timer > 0){
-                    $scope.timer--;
-                }
-            }, 1000, 10)
-        }else if(gamePhase === 'inGame' && $scope.playersIndexedByName[$scope.playerName].turn === false){
-            $interval.cancel(currentTimerPromise);
+            startTimer();
+        }else{
+            $interval.cancel($scope.timer.promise);
+            $scope.timer.active = false;
         }
+
+        /*else if(gamePhase === 'inGame' && $scope.playersIndexedByName[$scope.playerName].turn === false){
+            $interval.cancel(currentTimerPromise);
+        }*/
         previousPhase = gamePhase;
     }
 
+    function startTimer(){
+        if($scope.timer.promise){ $interval.cancel($scope.timer.promise); }
 
-})
+        $scope.timer.time = 10;
+        $scope.timer.active = true;
+        $scope.timer.promise = $interval(function(){
+            if($scope.timer.time > 0){
+                $scope.timer.time--;
+            }
+        }, 1000, 10);
+    }
+
+
+});
