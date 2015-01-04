@@ -144,6 +144,11 @@ module.exports = function Game(){
             nextPlayer();
         });
 
+        player.socket.on('split', function() {
+            if (player.hand.cards.length > 2 || player.hand.cards[0].value !== player.hand.cards[1].value) return;
+            console.log('we splitting!');
+        });
+
         player.socket.on('stand', function(data){
             clearTimeout(playerTurnTimeoutId);
             nextPlayer();
@@ -151,11 +156,11 @@ module.exports = function Game(){
 
         player.socket.on('startGame', function(){
             start();
-        })
+        });
 
         player.socket.on('disconnect', function(){
             offlinePlayers.push(player);
-        })
+        });
 
         player.socket.on('incrementStake', function(stake){
             var stakeValue = stake.stakeValue;
