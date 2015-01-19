@@ -113,6 +113,7 @@ module.exports = function Game(){
 
     function createListenActions(player){
         player.socket.on('hit', function(){
+            if (players[currentPlayerIndex] !== player) return;
             clearTimeout(playerTurnTimeoutId);
             giveCardToPlayer(player);
 
@@ -130,6 +131,7 @@ module.exports = function Game(){
         });
 
         player.socket.on('double', function(){
+            if (players[currentPlayerIndex] !== player) return;
             if (player.hands.getCurrentHandStake() > player.bank) return; //Not enough money
 
             clearTimeout(playerTurnTimeoutId);
@@ -145,6 +147,7 @@ module.exports = function Game(){
         });
 
         player.socket.on('split', function() {
+            if (players[currentPlayerIndex] !== player) return;
             if (player.hands.getCurrentHandStake() > player.bank || !player.hands.canSplit()) return;
 
             player.hands.split(); //Split operation takes care of everything except substracting to the bank
@@ -155,6 +158,7 @@ module.exports = function Game(){
         });
 
         player.socket.on('stand', function(){
+            if (players[currentPlayerIndex] !== player) return;
             clearTimeout(playerTurnTimeoutId);
             if (player.hands.hasNextHand()) {
                 transitionToNextHand(player);
