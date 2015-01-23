@@ -26,13 +26,13 @@
                 <div class="form-group">
                     <span style="float:right">Time: 10s</span>
                     <label>In bank:</label>
-                    <input class="form-control" placeholder="{{playersIndexedByName[playerName].bank}}" disabled>
+                    <input class="form-control" placeholder="{{player.bank}}" disabled>
                 </div>
                 <div class="form-group">
                     <label>Staking</label>
-                    <input class="form-control" placeholder="{{playersIndexedByName[playerName].hands[0].stake}}" disabled>
+                    <input class="form-control" placeholder="{{player.hands[0].stake}}" disabled>
                 </div>
-                <div class="form-group">
+                <div class="form-group" ng-show="player === uiPlayer">
                     <label>Increment Stake:</label>
                     <br>
                     <div class="btn-group" role="group">
@@ -46,7 +46,7 @@
             <div ng-show="gamePhase !== 'stakeRound'">
                 <div class="row handHolder">
                     <div ng-repeat="hand in player.hands">
-                        <div class="hand active">
+                        <div class="hand" ng-class="{'active': player.turn}">
                             <div class="clearfix">
                                 <span style="float:left">Stake: {{hand.stake}}</span>
                                 <span style="float:right">Time: 10s</span>
@@ -57,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="handControls">
+                <div class="handControls" ng-show="player === uiPlayer && player.turn">
                     <div class="btn-group" role="group" aria-label="...">
                         <button type="button" class="btn btn-default" ng-click="hit()">Hit</button>
                         <button type="button" class="btn btn-default" ng-click="double()">Double</button>
