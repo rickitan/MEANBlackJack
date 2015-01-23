@@ -3,6 +3,83 @@
     <p>Game Phase: {{gamePhase}}</p>
 </div>
 
+
+
+<div class="container">
+    <div class="starter-template">
+        <p class="lead">Welcome, you can invite your friends by sharing this URL:&nbsp;</p>
+        <div class="container">
+            <h2 class="playerName">Dealer</h2>
+            <div class="row" >
+                <img ng-repeat="card in dealer.hands[0].cards" ng-src="images/cards/{{card.imageName}}.svg" class="card">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row" ng-repeat="player in players">
+        <div class="col-md-4" style="text-align:center">
+            <h3>{{player.name}}</h3>
+
+            <form style="text-align: left" ng-show="gamePhase === 'stakeRound'">
+                <div class="form-group">
+                    <span style="float:right">Time: 10s</span>
+                    <label>In bank:</label>
+                    <input class="form-control" placeholder="{{player.bank}}" disabled>
+                </div>
+                <div class="form-group">
+                    <label>Staking</label>
+                    <input class="form-control" placeholder="{{player.hands[0].stake}}" disabled>
+                </div>
+                <div class="form-group" ng-show="player === uiPlayer">
+                    <label>Increment Stake:</label>
+                    <br>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-default" ng-click="incrementStake(100)">+100</button>
+                        <button type="button" class="btn btn-default" ng-click="incrementStake(500)">+500</button>
+                        <button type="button" class="btn btn-default" ng-click="incrementStake(1000)">+1000</button>
+                    </div>
+                </div>
+            </form>
+
+            <div ng-show="gamePhase !== 'stakeRound'">
+                <div class="row handHolder">
+                    <div ng-repeat="hand in player.hands">
+                        <div class="hand" ng-class="{'active': player.turn}">
+                            <div class="clearfix">
+                                <span style="float:left">Stake: {{hand.stake}}</span>
+                                <span style="float:right">Time: 10s</span>
+                            </div>
+                            <div class="cardsHolder">
+                                <img ng-repeat="card in hand.cards" ng-src="images/cards/{{card.imageName}}.svg" class="playerCard"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="handControls" ng-show="player === uiPlayer && player.turn">
+                    <div class="btn-group" role="group" aria-label="...">
+                        <button type="button" class="btn btn-default" ng-click="hit()">Hit</button>
+                        <button type="button" class="btn btn-default" ng-click="double()">Double</button>
+                        <button type="button" class="btn btn-default" ng-click="split()">Split</button>
+                        <button type="button" class="btn btn-default" ng-click="stand()">Stand</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+<!--
+
+
 <div>
     <div class="row">
 
@@ -62,3 +139,5 @@
         </div>
     </div>
 </div>
+
+-->

@@ -3,6 +3,7 @@ app.controller('gameController', function($scope, $interval){
     var previousPhase;
     var currentTimerPromise;
     $scope.playerName = prompt('Enter a username');
+    $scope.uiPlayer;
 
     var socket = io.connect('http://localhost:3000/');
     socket.on('connect', function(){
@@ -14,8 +15,12 @@ app.controller('gameController', function($scope, $interval){
             $scope.gamePhase = gameState.gamePhase;
             $scope.dealer = gameState.dealer;
             $scope.players = gameState.players;
-            $scope.playersIndexedByName = _.indexBy(gameState.players, 'name')
-            turnTimerOn(gameState.gamePhase);
+            gameState.players.forEach(function(player){
+               if (player.name === $scope.playerName) {
+                   $scope.uiPlayer = player;
+               }
+            });
+            //turnTimerOn(gameState.gamePhase);
         })
     });
 
@@ -76,7 +81,7 @@ app.controller('gameController', function($scope, $interval){
     }
 
     $scope.incrementStake = function(stake){
-        var moneyAvailable = $scope.playersIndexedByName[$scope.playerName].bank;
+        var moneyAvailable = $scope.uiPlayer.bank;
         if (stake > moneyAvailable) {
             alert('You do not have enough money in the bank!');
             return;
