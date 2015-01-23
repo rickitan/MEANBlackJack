@@ -20,7 +20,6 @@ body
 {
     .card
     {
-        background-image: url('http://127.0.0.1:40000/file:///Users/ricardomacario/WebstormProjects/blackjack/public/images/cards/queen_of_spades2.svg');
         margin: 3px;
         height: 150px;
     }
